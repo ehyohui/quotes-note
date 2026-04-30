@@ -6,9 +6,9 @@ const SOURCE_COLORS = { 롱블랙:"#c8a96e", "민음사 세계문학일력":"#a7
 const C = { cream:"#F5F0E8", white:"#FFFFFF", terracotta:"#C4522A", terracottaHover:"#A8421F", border:"#DDD3C0", text:"#2C1A0E", muted:"#9A7E6A", hover:"#F7F2EA", pill:"#E8DFCC", pillText:"#7A5C3E", darkGray:"#3D3D3D" };
 const ITEMS_PER_PAGE = 5;
 const INITIAL_QUOTES = [
-  { id:1, text:"성과가 어땠냐고? 온라인 영업 조직이 만든 변화가 인상적이야. 수백 개의 댓글을 AI가 수집하고 분류해, FAQ 생성까지 하게 했지.", source:"롱블랙", book:"바이브의 시대", author:"롱블랙 에디터", date:"2025-04-29", tags:["AI","조직"] },
-  { id:2, text:"김 교수가 가장 위험하다고 본 건 AI가 내놓은 결과에 사람이 취해버리는 순간이야. 사람은 AI에 끌려가기 시작한다는 거지.", source:"롱블랙", book:"바이브의 시대", author:"롱블랙 에디터", date:"2025-04-29", tags:["AI"] },
-  { id:3, text:"각 사람은 자신의 개성을 발전시킨 정도에 비례해서 그만큼 더 자기 자신에게 가치를 지니게 되고, 그 결과 다른 사람들에게도 더 가치 있게 된다.", source:"밀리의 서재", book:"자유론", author:"존스튜어트밀", date:"2025-04-29", tags:["성장","마음"] },
+  { id:1, text:"성과가 어땠냐고? 온라인 영업 조직이 만든 변화가 인상적이야. 수백 개의 댓글을 AI가 수집하고 분류해, FAQ 생성까지 하게 했지.", source:"롱블랙", book:"바이브의 시대", author:"롱블랙 에디터", date:"2026-04-29", tags:["AI","조직"] },
+  { id:2, text:"김 교수가 가장 위험하다고 본 건 AI가 내놓은 결과에 사람이 취해버리는 순간이야. 사람은 AI에 끌려가기 시작한다는 거지.", source:"롱블랙", book:"바이브의 시대", author:"롱블랙 에디터", date:"2026-04-29", tags:["AI"] },
+  { id:3, text:"각 사람은 자신의 개성을 발전시킨 정도에 비례해서 그만큼 더 자기 자신에게 가치를 지니게 되고, 그 결과 다른 사람들에게도 더 가치 있게 된다.", source:"밀리의 서재", book:"자유론", author:"존스튜어트밀", date:"2026-04-29", tags:["성장","마음"] },
   { id:4, text:"다루는 주제가 심오할수록 그 표현은 소박하다. 모든 숭고한 것들은 언제나 실망스러울 정도로 평이한 말들로 설법되는 법이다.", source:"민음사 세계문학일력", book:"장 그르니에 선집", author:"장 그르니에", date:"2026-04-29", tags:["마음"] },
 ];
 
@@ -140,7 +140,7 @@ function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
             <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
               {FIXED_TAGS.map(t=>{
                 const on=tags.includes(t);
-                return <button key={t} onClick={()=>toggleTag(t)} style={{ padding:"6px 14px", borderRadius:"20px", cursor:"pointer", fontSize:"13px", border:on?`1px solid ${C.terracotta}`:`1px solid ${C.border}`, background:on?C.terracotta:C.pill, color:on?"#fff":C.pillText, fontWeight:on?"600":"400" }}>#{t}</button>;
+                return <button key={t} onClick={()=>toggleTag(t)} style={{ padding:"4px 11px", borderRadius:"20px", cursor:"pointer", fontSize:"13px", border:on?`1px solid ${C.terracotta}`:`1px solid ${C.border}`, background:on?C.terracotta:C.pill, color:on?"#fff":C.pillText, fontWeight:on?"600":"400" }}>#{t}</button>;
               })}
             </div>
           </div>
@@ -283,8 +283,8 @@ export default function App() {
       const src  = activeSource==="전체" || q.source===activeSource;
       const tag  = !activeTag || q.tags.includes(activeTag);
       const kw   = !search || [q.text,q.book,q.author].some(s=>s.toLowerCase().includes(search.toLowerCase()));
-      const from = !dateFrom || q.date >= dateFrom;
-      const to   = !dateTo   || q.date <= dateTo;
+      const from = !dateFrom || q.date.slice(0,10) >= dateFrom.slice(0,10);
+      const to   = !dateTo   || q.date.slice(0,10) <= dateTo.slice(0,10);
       return src && tag && kw && from && to;
     });
   }, [quotes, search, activeSource, activeTag, dateFrom, dateTo]);
@@ -321,7 +321,8 @@ export default function App() {
         ::placeholder { color:${C.muted}; opacity:0.7; }
         ::-webkit-scrollbar { width:4px; }
         ::-webkit-scrollbar-thumb { background:${C.border}; border-radius:2px; }
-        input[type="date"]::-webkit-calendar-picker-indicator { opacity:0.5; cursor:pointer; }
+        input[type="date"]::-webkit-calendar-picker-indicator { opacity:0; cursor:pointer; width:100%; position:absolute; left:0; }
+        input[type="date"] { position:relative; }
       `}</style>
 
       {!isMobile && (
@@ -366,27 +367,31 @@ export default function App() {
               <span style={{ fontSize:"10px" }}>{showDateFilter?"▲":"▼"}</span>
             </button>
             {showDateFilter && (
-              <div style={{ position:"absolute", right:0, top:"calc(100% + 6px)", zIndex:50, padding:"16px 20px", background:C.cream, borderRadius:"12px", border:`1px solid ${C.border}`, boxShadow:"0 4px 20px rgba(44,26,14,0.12)", width:280, boxSizing:"border-box" }}>
-                <div style={{ display:"flex", gap:8, alignItems:"center", justifyContent:"center" }}>
+              <div style={{ position:"fixed", right:16, top:"auto", marginTop:8, zIndex:50, padding:"14px 16px", background:C.cream, borderRadius:"12px", border:`1px solid ${C.border}`, boxShadow:"0 4px 20px rgba(44,26,14,0.12)", width:"calc(100vw - 32px)", maxWidth:320, boxSizing:"border-box" }}>
+                <div style={{ display:"flex", gap:16 }}>
                   <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
-                    <label style={{ fontSize:"11px", color:C.muted, fontWeight:"500", textAlign:"center" }}>시작일</label>
-                    <input type="date" value={dateFrom} onChange={e=>{setDateFrom(e.target.value);setPage(1);}}
-                      style={{ padding:"7px 8px", border:`1px solid ${C.border}`, borderRadius:"7px", fontSize:"12px", color:C.text, background:C.white, outline:"none", width:"100%", boxSizing:"border-box", textAlign:"center" }}
-                      onFocus={e=>(e.target.style.borderColor=C.terracotta)}
-                      onBlur={e=>(e.target.style.borderColor=C.border)} />
+                    <label style={{ fontSize:"11px", color:"#9A7E6A", fontWeight:"500" }}>시작일</label>
+                    <div style={{ position:"relative", height:26 }}>
+                      <span style={{ position:"absolute", left:0, bottom:4, fontSize:"13px", color: dateFrom ? "transparent" : "#C8B8A8", pointerEvents:"none", transition:"color 0.1s" }}>날짜 선택</span>
+                      <input type="date" value={dateFrom} onChange={e=>{setDateFrom(e.target.value);setPage(1);}}
+                        style={{ position:"absolute", left:0, bottom:0, width:"100%", padding:"0", border:"none", borderBottom:"1.5px solid #DDD3C0", fontSize:"13px", color:"#2C1A0E", background:"transparent", outline:"none", boxSizing:"border-box", fontFamily:"inherit", height:26 }}
+                        onFocus={e=>(e.target.style.borderBottomColor="#C4522A")}
+                        onBlur={e=>(e.target.style.borderBottomColor="#DDD3C0")} />
+                    </div>
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
-                    <label style={{ fontSize:"11px", color:C.muted, fontWeight:"500", textAlign:"center" }}>종료일</label>
-                    <input type="date" value={dateTo} onChange={e=>{setDateTo(e.target.value);setPage(1);}}
-                      style={{ padding:"7px 8px", border:`1px solid ${C.border}`, borderRadius:"7px", fontSize:"12px", color:C.text, background:C.white, outline:"none", width:"100%", boxSizing:"border-box", textAlign:"center" }}
-                      onFocus={e=>(e.target.style.borderColor=C.terracotta)}
-                      onBlur={e=>(e.target.style.borderColor=C.border)} />
+                    <label style={{ fontSize:"11px", color:"#9A7E6A", fontWeight:"500" }}>종료일</label>
+                    <div style={{ position:"relative", height:26 }}>
+                      <span style={{ position:"absolute", left:0, bottom:4, fontSize:"13px", color: dateTo ? "transparent" : "#C8B8A8", pointerEvents:"none", transition:"color 0.1s" }}>날짜 선택</span>
+                      <input type="date" value={dateTo} onChange={e=>{setDateTo(e.target.value);setPage(1);}}
+                        style={{ position:"absolute", left:0, bottom:0, width:"100%", padding:"0", border:"none", borderBottom:"1.5px solid #DDD3C0", fontSize:"13px", color:"#2C1A0E", background:"transparent", outline:"none", boxSizing:"border-box", fontFamily:"inherit", height:26 }}
+                        onFocus={e=>(e.target.style.borderBottomColor="#C4522A")}
+                        onBlur={e=>(e.target.style.borderBottomColor="#DDD3C0")} />
+                    </div>
                   </div>
                 </div>
                 {(dateFrom||dateTo) && (
-                  <div style={{ textAlign:"center", marginTop:10 }}>
-                    <button onClick={()=>{setDateFrom("");setDateTo("");}} style={{ fontSize:"11px", color:C.muted, background:"none", border:"none", cursor:"pointer" }}>✕ 초기화</button>
-                  </div>
+                  <button onClick={()=>{setDateFrom("");setDateTo("");setPage(1);}} style={{ marginTop:10, fontSize:"11px", color:"#9A7E6A", background:"none", border:"none", cursor:"pointer", display:"block", width:"100%", textAlign:"center" }}>✕ 초기화</button>
                 )}
               </div>
             )}
@@ -409,7 +414,7 @@ export default function App() {
             return (
               <button key={t} onClick={()=>{setActiveTag(on?"":t);setPage(1);}}
                 style={{
-                  padding:"6px 14px", borderRadius:"20px", cursor:"pointer", fontSize:"12px",
+                  padding:"4px 11px", borderRadius:"20px", cursor:"pointer", fontSize:"12px",
                   border: on ? `1.5px solid ${C.terracotta}` : `1.5px solid ${C.border}`,
                   background: on ? C.terracotta : C.pill,
                   color: on ? "#fff" : C.pillText,
