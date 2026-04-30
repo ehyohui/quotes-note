@@ -265,16 +265,29 @@ export default function App() {
       const saved = localStorage.getItem("quotes-data");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) { setQuotes(parsed); setLoaded(true); return; }
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setQuotes(parsed);
+          setLoaded(true);
+          return;
+        }
       }
-    } catch {}
-    setQuotes(INITIAL_QUOTES);
+    } catch (e) {
+      console.error("load error", e);
+    }
+    // localStorage 없을 때만 샘플 사용 + 바로 저장
+    const initial = INITIAL_QUOTES;
+    setQuotes(initial);
+    try { localStorage.setItem("quotes-data", JSON.stringify(initial)); } catch {}
     setLoaded(true);
   }, []);
 
   const saveQuotes = (q) => {
     setQuotes(q);
-    try { localStorage.setItem("quotes-data", JSON.stringify(q)); } catch {}
+    try {
+      localStorage.setItem("quotes-data", JSON.stringify(q));
+    } catch (e) {
+      console.error("save error", e);
+    }
   };
 
   const filtered = useMemo(() => {
