@@ -459,3 +459,6 @@ export default function App() {
 
       {showModal && <AddModal onClose={()=>setShowModal(false)} onAdd={q=>saveQuotes([...q,...quotes])} onEdit={()=>{}} existingQuotes={quotes} />}
       {editTarget && <AddModal onClose={()=>setEditTarget(null)} onAdd={()=>{}} onEdit={u=>{saveQuotes(quotes.map(q=>q.id===u.id?u:q));setEditTarget(null);}} existingQuotes={quotes} initialData={editTarget} />}
+    </div>
+  );
+}
