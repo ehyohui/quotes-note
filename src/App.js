@@ -1,27 +1,19 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 const SOURCES = ["전체", "롱블랙", "민음사 세계문학일력", "밀리의 서재", "퍼블리"];
 const FIXED_TAGS = ["AI", "조직", "성장", "브랜딩", "마음"];
-const SOURCE_COLORS = {
-  롱블랙: "#c8a96e",
-  "민음사 세계문학일력": "#a78bca",
-  "밀리의 서재": "#6aaa74",
-  퍼블리: "#6b9fc9",
-};
-const C = {
-  cream: "#F5F0E8", white: "#FFFFFF", terracotta: "#C4522A",
-  terracottaHover: "#A8421F", border: "#DDD3C0", text: "#2C1A0E",
-  muted: "#9A7E6A", hover: "#F7F2EA", pill: "#E8DFCC", pillText: "#7A5C3E",
-};
+const SOURCE_COLORS = { 롱블랙:"#c8a96e", "민음사 세계문학일력":"#a78bca", "밀리의 서재":"#6aaa74", 퍼블리:"#6b9fc9" };
+const C = { cream:"#F5F0E8", white:"#FFFFFF", terracotta:"#C4522A", terracottaHover:"#A8421F", border:"#DDD3C0", text:"#2C1A0E", muted:"#9A7E6A", hover:"#F7F2EA", pill:"#E8DFCC", pillText:"#7A5C3E", darkGray:"#3D3D3D" };
+const ITEMS_PER_PAGE = 5;
 const INITIAL_QUOTES = [
-  { id: 1, text: "성과가 어땠냐고? 온라인 영업 조직이 만든 변화가 인상적이야. 수백 개의 댓글을 AI가 수집하고 분류해, FAQ 생성까지 하게 했지.", source: "롱블랙", book: "바이브의 시대", author: "롱블랙 에디터", date: "2025-04-29", tags: ["AI", "조직"] },
-  { id: 2, text: "김 교수가 가장 위험하다고 본 건 AI가 내놓은 결과에 사람이 취해버리는 순간이야. 사람은 AI에 끌려가기 시작한다는 거지.", source: "롱블랙", book: "바이브의 시대", author: "롱블랙 에디터", date: "2025-04-29", tags: ["AI"] },
-  { id: 3, text: "각 사람은 자신의 개성을 발전시킨 정도에 비례해서 그만큼 더 자기 자신에게 가치를 지니게 되고, 그 결과 다른 사람들에게도 더 가치 있게 된다.", source: "밀리의 서재", book: "자유론", author: "존스튜어트밀", date: "2025-04-29", tags: ["성장", "마음"] },
-  { id: 4, text: "다루는 주제가 심오할수록 그 표현은 소박하다. 모든 숭고한 것들은 언제나 실망스러울 정도로 평이한 말들로 설법되는 법이다.", source: "민음사 세계문학일력", book: "장 그르니에 선집", author: "장 그르니에", date: "2026-04-29", tags: ["마음"] },
+  { id:1, text:"성과가 어땠냐고? 온라인 영업 조직이 만든 변화가 인상적이야. 수백 개의 댓글을 AI가 수집하고 분류해, FAQ 생성까지 하게 했지.", source:"롱블랙", book:"바이브의 시대", author:"롱블랙 에디터", date:"2025-04-29", tags:["AI","조직"] },
+  { id:2, text:"김 교수가 가장 위험하다고 본 건 AI가 내놓은 결과에 사람이 취해버리는 순간이야. 사람은 AI에 끌려가기 시작한다는 거지.", source:"롱블랙", book:"바이브의 시대", author:"롱블랙 에디터", date:"2025-04-29", tags:["AI"] },
+  { id:3, text:"각 사람은 자신의 개성을 발전시킨 정도에 비례해서 그만큼 더 자기 자신에게 가치를 지니게 되고, 그 결과 다른 사람들에게도 더 가치 있게 된다.", source:"밀리의 서재", book:"자유론", author:"존스튜어트밀", date:"2025-04-29", tags:["성장","마음"] },
+  { id:4, text:"다루는 주제가 심오할수록 그 표현은 소박하다. 모든 숭고한 것들은 언제나 실망스러울 정도로 평이한 말들로 설법되는 법이다.", source:"민음사 세계문학일력", book:"장 그르니에 선집", author:"장 그르니에", date:"2026-04-29", tags:["마음"] },
 ];
 
 function today() { return new Date().toISOString().split("T")[0]; }
-function SourceDot({ source, size = 8 }) {
+function SourceDot({ source, size=8 }) {
   return <span style={{ display:"inline-block", width:size, height:size, borderRadius:"50%", background:SOURCE_COLORS[source]??C.muted, flexShrink:0 }} />;
 }
 function EditIcon() {
@@ -35,7 +27,6 @@ function EditIcon() {
   );
 }
 
-// ── AddModal ──────────────────────────────────────────────────────────────────
 function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
   const isEdit = !!initialData;
   const [texts, setTexts]   = useState(isEdit ? [initialData.text] : [""]);
@@ -84,10 +75,9 @@ function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
     <div onClick={e=>e.target===e.currentTarget&&onClose()}
       style={{ position:"fixed", inset:0, background:"rgba(44,26,14,0.5)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:1000 }}>
       <div style={{ background:C.cream, borderRadius:"20px 20px 0 0", padding:"24px 20px", width:"100%", maxWidth:"560px", maxHeight:"90vh", overflowY:"auto", boxShadow:"0 -8px 40px rgba(44,26,14,0.2)" }}>
-        {/* 핸들 */}
         <div style={{ width:40, height:4, background:C.border, borderRadius:2, margin:"0 auto 20px" }} />
         <h2 style={{ fontSize:"17px", fontWeight:"700", color:C.terracotta, marginBottom:"20px", fontFamily:"'Nanum Myeongjo',serif" }}>
-          {isEdit?"문구 편집":"문구 추가"}
+          {isEdit ? "문구 편집" : "문구 추가"}
         </h2>
         <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
           <div>
@@ -121,7 +111,7 @@ function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
               onChange={e=>{setBook(e.target.value);setShowSuggest(true);}}
               onFocus={()=>setShowSuggest(true)}
               onBlur={()=>setTimeout(()=>setShowSuggest(false),300)}
-              style={inp} onFocusCap={e=>(e.target.style.borderColor=C.terracotta)} />
+              style={inp} />
             {showSuggest && suggestions.length>0 && (
               <div style={{ position:"absolute", top:"100%", left:0, right:0, zIndex:10, background:C.cream, border:`1px solid ${C.border}`, borderRadius:"8px", marginTop:4, boxShadow:"0 4px 20px rgba(44,26,14,0.12)", overflow:"hidden" }}>
                 {suggestions.map(b=>(
@@ -131,7 +121,7 @@ function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
                     onMouseLeave={e=>(e.currentTarget.style.background="transparent")}>
                     <div style={{ fontSize:"13px", color:C.text, fontWeight:"600" }}>{b}</div>
                     <div style={{ fontSize:"12px", color:C.muted, marginTop:2, display:"flex", alignItems:"center", gap:4 }}>
-                      <SourceDot source={bookMap[b]?.source} size={6} /> <span style={{ marginLeft:4 }}>{bookMap[b]?.author}</span>
+                      <SourceDot source={bookMap[b]?.source} size={6} /><span style={{ marginLeft:4 }}>{bookMap[b]?.author}</span>
                     </div>
                   </div>
                 ))}
@@ -157,8 +147,8 @@ function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
         </div>
         <div style={{ display:"flex", gap:"10px", marginTop:"20px" }}>
           <button onClick={onClose} style={{ flex:1, padding:"13px", background:C.pill, border:"none", borderRadius:"10px", color:C.pillText, cursor:"pointer", fontSize:"15px" }}>취소</button>
-          <button onClick={handleSave} style={{ flex:2, padding:"13px", border:"none", borderRadius:"10px", background:hasContent?C.terracotta:C.border, color:"#fff", cursor:hasContent?"pointer":"default", fontSize:"15px", fontWeight:"600" }}>
-            {isEdit?"수정 완료":`저장${texts.filter(t=>t.trim()).length>1?` (${texts.filter(t=>t.trim()).length}개)`:""}`}
+          <button onClick={handleSave} style={{ flex:2, padding:"13px", border:"none", borderRadius:"10px", background:hasContent?C.darkGray:C.border, color:"#fff", cursor:hasContent?"pointer":"default", fontSize:"15px", fontWeight:"600" }}>
+            {isEdit ? "수정 완료" : `저장${texts.filter(t=>t.trim()).length>1?` (${texts.filter(t=>t.trim()).length}개)`:""}`}
           </button>
         </div>
       </div>
@@ -166,31 +156,33 @@ function AddModal({ onClose, onAdd, onEdit, existingQuotes, initialData }) {
   );
 }
 
-// ── QuoteRow ──────────────────────────────────────────────────────────────────
 function QuoteRow({ quote, onDelete, onEdit }) {
   const [open, setOpen] = useState(false);
   const accent = SOURCE_COLORS[quote.source]??C.muted;
   return (
     <div style={{ borderBottom:`1px solid ${C.border}` }}>
-      <div onClick={()=>setOpen(v=>!v)} style={{ display:"flex", gap:"12px", padding:"14px 16px", cursor:"pointer" }}
+      <div onClick={()=>setOpen(v=>!v)} style={{ display:"flex", gap:"10px", padding:"10px 14px", cursor:"pointer" }}
         onMouseEnter={e=>(e.currentTarget.style.background=C.hover)}
         onMouseLeave={e=>(e.currentTarget.style.background="transparent")}>
-        <div style={{ width:3, borderRadius:2, background:accent, alignSelf:"stretch", flexShrink:0, minHeight:40 }} />
+        <div style={{ width:3, borderRadius:2, background:accent, alignSelf:"stretch", flexShrink:0, minHeight:32 }} />
         <div style={{ flex:1, minWidth:0 }}>
-          <p style={{ fontFamily:"'Nanum Myeongjo',Georgia,serif", fontSize:"15px", lineHeight:"1.75", color:C.text, margin:"0 0 7px",
+          <div style={{ display:"flex", alignItems:"center", gap:5, marginBottom:4 }}>
+            <SourceDot source={quote.source} />
+            <span style={{ fontSize:"12px", color:C.muted, overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>《{quote.book}》</span>
+            <span style={{ fontSize:"11px", color:C.border }}>·</span>
+            <span style={{ fontSize:"11px", color:C.muted }}>{quote.source}</span>
+          </div>
+          <p style={{ fontFamily:"'Nanum Myeongjo',Georgia,serif", fontSize:"14px", lineHeight:"1.7", color:C.text, margin:"0 0 5px",
             display:open?"block":"-webkit-box", WebkitLineClamp:open?"unset":2, WebkitBoxOrient:"vertical", overflow:open?"visible":"hidden" }}>
             {quote.text}
           </p>
           <div style={{ display:"flex", alignItems:"center", gap:"6px", flexWrap:"wrap" }}>
-            <SourceDot source={quote.source} />
-            <span style={{ fontSize:"12px", color:C.muted }}>{quote.source}</span>
-            <span style={{ fontSize:"12px", color:C.border }}>·</span>
-            <span style={{ fontSize:"12px", color:C.muted, overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis", maxWidth:160 }}>《{quote.book}》</span>
+            <span style={{ fontSize:"11px", color:C.muted }}>{quote.date}</span>
             {quote.tags.map(t=>(
               <span key={t} style={{ fontSize:"11px", color:C.pillText, background:C.pill, padding:"1px 7px", borderRadius:"20px" }}>#{t}</span>
             ))}
           </div>
-          {open && <p style={{ fontSize:"12px", color:C.muted, marginTop:6 }}>— {quote.author} · {quote.date}</p>}
+          {open && <p style={{ fontSize:"12px", color:C.muted, marginTop:6 }}>— {quote.author}</p>}
         </div>
         <div style={{ display:"flex", gap:"2px", flexShrink:0 }}>
           <button onClick={e=>{e.stopPropagation();onEdit(quote);}} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, padding:"4px 6px", borderRadius:"4px", display:"flex", alignItems:"center" }}
@@ -207,9 +199,6 @@ function QuoteRow({ quote, onDelete, onEdit }) {
   );
 }
 
-
-
-// ── 사이드바 드로어 (모바일) ──────────────────────────────────────────────────
 function Drawer({ open, onClose, activeSource, setActiveSource, counts }) {
   if (!open) return null;
   return (
@@ -231,17 +220,39 @@ function Drawer({ open, onClose, activeSource, setActiveSource, counts }) {
   );
 }
 
-// ── Main App ──────────────────────────────────────────────────────────────────
+function Pagination({ total, page, setPage }) {
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+  if (totalPages <= 1) return null;
+  return (
+    <div style={{ display:"flex", justifyContent:"center", alignItems:"center", gap:6, padding:"20px 0" }}>
+      <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}
+        style={{ padding:"6px 12px", borderRadius:"6px", border:`1px solid ${C.border}`, background:"transparent", color:page===1?C.border:C.muted, cursor:page===1?"default":"pointer", fontSize:"13px" }}>‹</button>
+      {Array.from({length:totalPages},(_,i)=>i+1).map(n=>(
+        <button key={n} onClick={()=>setPage(n)}
+          style={{ width:32, height:32, borderRadius:"6px", border:`1px solid ${page===n?C.darkGray:C.border}`, background:page===n?C.darkGray:"transparent", color:page===n?"#fff":C.muted, cursor:"pointer", fontSize:"13px", fontWeight:page===n?"600":"400" }}>
+          {n}
+        </button>
+      ))}
+      <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages}
+        style={{ padding:"6px 12px", borderRadius:"6px", border:`1px solid ${C.border}`, background:"transparent", color:page===totalPages?C.border:C.muted, cursor:page===totalPages?"default":"pointer", fontSize:"13px" }}>›</button>
+    </div>
+  );
+}
+
 export default function App() {
-  const [quotes, setQuotes]             = useState([]);
-  const [search, setSearch]             = useState("");
-  const [activeSource, setActiveSource] = useState("전체");
-  const [activeTag, setActiveTag]       = useState("");
-  const [showModal, setShowModal]       = useState(false);
-  const [editTarget, setEditTarget]     = useState(null);
-  const [showDrawer, setShowDrawer]     = useState(false);
-  const [loaded, setLoaded]             = useState(false);
-  const [isMobile, setIsMobile]         = useState(window.innerWidth < 640);
+  const [quotes, setQuotes]               = useState([]);
+  const [search, setSearch]               = useState("");
+  const [activeSource, setActiveSource]   = useState("전체");
+  const [activeTag, setActiveTag]         = useState("");
+  const [dateFrom, setDateFrom]           = useState("");
+  const [dateTo, setDateTo]               = useState("");
+  const [showModal, setShowModal]         = useState(false);
+  const [editTarget, setEditTarget]       = useState(null);
+  const [showDrawer, setShowDrawer]       = useState(false);
+  const [showDateFilter, setShowDateFilter] = useState(false);
+  const [loaded, setLoaded]               = useState(false);
+  const [page, setPage]                   = useState(1);
+  const [isMobile, setIsMobile]           = useState(window.innerWidth < 640);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
@@ -254,9 +265,7 @@ export default function App() {
       const saved = localStorage.getItem("quotes-data");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setQuotes(parsed); setLoaded(true); return;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) { setQuotes(parsed); setLoaded(true); return; }
       }
     } catch {}
     setQuotes(INITIAL_QUOTES);
@@ -268,12 +277,22 @@ export default function App() {
     try { localStorage.setItem("quotes-data", JSON.stringify(q)); } catch {}
   };
 
-  const filtered = useMemo(() => quotes.filter(q => {
-    const src = activeSource==="전체" || q.source===activeSource;
-    const tag = !activeTag || q.tags.includes(activeTag);
-    const kw  = !search || [q.text,q.book,q.author].some(s=>s.toLowerCase().includes(search.toLowerCase()));
-    return src && tag && kw;
-  }), [quotes, search, activeSource, activeTag]);
+  const filtered = useMemo(() => {
+    setPage(1);
+    return quotes.filter(q => {
+      const src  = activeSource==="전체" || q.source===activeSource;
+      const tag  = !activeTag || q.tags.includes(activeTag);
+      const kw   = !search || [q.text,q.book,q.author].some(s=>s.toLowerCase().includes(search.toLowerCase()));
+      const from = !dateFrom || q.date >= dateFrom;
+      const to   = !dateTo   || q.date <= dateTo;
+      return src && tag && kw && from && to;
+    });
+  }, [quotes, search, activeSource, activeTag, dateFrom, dateTo]);
+
+  const paginated = useMemo(() => {
+    const start = (page-1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, page]);
 
   const counts = useMemo(() => {
     const c = {전체:quotes.length};
@@ -302,9 +321,9 @@ export default function App() {
         ::placeholder { color:${C.muted}; opacity:0.7; }
         ::-webkit-scrollbar { width:4px; }
         ::-webkit-scrollbar-thumb { background:${C.border}; border-radius:2px; }
+        input[type="date"]::-webkit-calendar-picker-indicator { opacity:0.5; cursor:pointer; }
       `}</style>
 
-      {/* 데스크탑 사이드바 */}
       {!isMobile && (
         <aside style={{ width:210, flexShrink:0, background:C.cream, borderRight:`1px solid ${C.border}`, padding:"28px 14px", position:"sticky", top:0, height:"100vh", overflowY:"auto" }}>
           <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:"22px", color:C.terracotta, marginBottom:4 }}>my archive</div>
@@ -323,14 +342,12 @@ export default function App() {
         </aside>
       )}
 
-      {/* 모바일 드로어 */}
       <Drawer open={showDrawer} onClose={()=>setShowDrawer(false)} activeSource={activeSource} setActiveSource={setActiveSource} counts={counts} />
 
-      {/* Main */}
-      <main style={{ flex:1, padding:isMobile?"16px 16px 100px":"32px 40px", maxWidth:860, overflowX:"hidden" }}>
+      <main style={{ flex:1, padding:isMobile?"16px 16px 40px":"32px 40px", maxWidth:860, overflowX:"hidden" }}>
 
         {/* 헤더 */}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             {isMobile && (
               <button onClick={()=>setShowDrawer(true)} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:20, padding:"2px 4px" }}>☰</button>
@@ -340,62 +357,105 @@ export default function App() {
               <p style={{ fontFamily:"'Dancing Script',cursive", fontSize:"14px", color:C.muted, marginTop:2 }}>words that stayed with me</p>
             </div>
           </div>
-          {!isMobile && (
-            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-              <button onClick={()=>setShowModal(true)} style={{ padding:"10px 18px", background:C.terracotta, border:"none", borderRadius:"8px", color:"#fff", fontSize:"13px", fontWeight:"600", cursor:"pointer", boxShadow:"0 2px 8px rgba(196,82,42,0.25)" }}
-                onMouseEnter={e=>(e.currentTarget.style.background=C.terracottaHover)}
-                onMouseLeave={e=>(e.currentTarget.style.background=C.terracotta)}>+ 문구 추가</button>
-            </div>
-          )}
+          {/* 날짜 필터 — 우측 상단 */}
+          <div style={{ position:"relative" }}>
+            <button onClick={()=>setShowDateFilter(v=>!v)}
+              style={{ display:"flex", alignItems:"center", gap:5, padding:"7px 12px", borderRadius:"8px", cursor:"pointer", fontSize:"12px", border:`1px solid ${showDateFilter||dateFrom||dateTo?C.terracotta:C.border}`, background:showDateFilter||dateFrom||dateTo?"#fff5f2":"transparent", color:showDateFilter||dateFrom||dateTo?C.terracotta:C.muted, fontWeight:showDateFilter||dateFrom||dateTo?"600":"400", transition:"all 0.15s" }}>
+              📅 날짜
+              {(dateFrom||dateTo) && <span style={{ fontSize:"10px", background:C.terracotta, color:"#fff", padding:"1px 6px", borderRadius:"20px" }}>ON</span>}
+              <span style={{ fontSize:"10px" }}>{showDateFilter?"▲":"▼"}</span>
+            </button>
+            {showDateFilter && (
+              <div style={{ position:"absolute", right:0, top:"calc(100% + 6px)", zIndex:50, padding:"16px 20px", background:C.cream, borderRadius:"12px", border:`1px solid ${C.border}`, boxShadow:"0 4px 20px rgba(44,26,14,0.12)", width:280, boxSizing:"border-box" }}>
+                <div style={{ display:"flex", gap:8, alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
+                    <label style={{ fontSize:"11px", color:C.muted, fontWeight:"500", textAlign:"center" }}>시작일</label>
+                    <input type="date" value={dateFrom} onChange={e=>{setDateFrom(e.target.value);setPage(1);}}
+                      style={{ padding:"7px 8px", border:`1px solid ${C.border}`, borderRadius:"7px", fontSize:"12px", color:C.text, background:C.white, outline:"none", width:"100%", boxSizing:"border-box", textAlign:"center" }}
+                      onFocus={e=>(e.target.style.borderColor=C.terracotta)}
+                      onBlur={e=>(e.target.style.borderColor=C.border)} />
+                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
+                    <label style={{ fontSize:"11px", color:C.muted, fontWeight:"500", textAlign:"center" }}>종료일</label>
+                    <input type="date" value={dateTo} onChange={e=>{setDateTo(e.target.value);setPage(1);}}
+                      style={{ padding:"7px 8px", border:`1px solid ${C.border}`, borderRadius:"7px", fontSize:"12px", color:C.text, background:C.white, outline:"none", width:"100%", boxSizing:"border-box", textAlign:"center" }}
+                      onFocus={e=>(e.target.style.borderColor=C.terracotta)}
+                      onBlur={e=>(e.target.style.borderColor=C.border)} />
+                  </div>
+                </div>
+                {(dateFrom||dateTo) && (
+                  <div style={{ textAlign:"center", marginTop:10 }}>
+                    <button onClick={()=>{setDateFrom("");setDateTo("");}} style={{ fontSize:"11px", color:C.muted, background:"none", border:"none", cursor:"pointer" }}>✕ 초기화</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-
-        <p style={{ fontSize:"13px", color:C.muted, marginBottom:16 }}>
-          {activeSource!=="전체"?activeSource:"전체"}{activeTag?` · #${activeTag}`:""} · {filtered.length}개
-        </p>
 
         {/* 검색 */}
         <div style={{ position:"relative", marginBottom:10 }}>
           <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", fontSize:14, color:C.muted }}>🔍</span>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="문구, 책 제목, 저자 검색"
+          <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="문구, 책 제목, 저자 검색"
             style={{ width:"100%", padding:"10px 14px 10px 36px", border:`1px solid ${C.border}`, borderRadius:"8px", fontSize:"14px", color:C.text, background:C.white, outline:"none" }}
             onFocus={e=>(e.target.style.borderColor=C.terracotta)}
             onBlur={e=>(e.target.style.borderColor=C.border)} />
         </div>
 
         {/* 태그 필터 */}
-        <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", marginBottom:14 }}>
+        <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", marginBottom:10 }}>
           {FIXED_TAGS.map(t=>{
             const on=activeTag===t;
             return (
-              <button key={t} onClick={()=>setActiveTag(on?"":t)}
-                style={{ padding:"5px 12px", borderRadius:"20px", cursor:"pointer", fontSize:"12px", border:on?`1px solid ${C.terracotta}`:`1px solid ${C.border}`, background:on?C.terracotta:"transparent", color:on?"#fff":C.muted, fontWeight:on?"600":"400", transition:"all 0.15s" }}>
-                #{t} <span style={{opacity:0.6}}>{tagCounts[t]??0}</span>
+              <button key={t} onClick={()=>{setActiveTag(on?"":t);setPage(1);}}
+                style={{
+                  padding:"6px 14px", borderRadius:"20px", cursor:"pointer", fontSize:"12px",
+                  border: on ? `1.5px solid ${C.terracotta}` : `1.5px solid ${C.border}`,
+                  background: on ? C.terracotta : C.pill,
+                  color: on ? "#fff" : C.pillText,
+                  fontWeight: on ? "700" : "500",
+                  boxShadow: on ? "0 2px 8px rgba(196,82,42,0.25)" : "0 1px 3px rgba(44,26,14,0.08)",
+                  transition:"all 0.15s",
+                }}>
+                #{t} <span style={{ opacity:0.7, fontSize:"11px" }}>{tagCounts[t]??0}</span>
               </button>
             );
           })}
         </div>
 
-        <div style={{ borderBottom:`1px solid ${C.border}` }} />
+        {/* 카드 개수 */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:`1px solid ${C.border}` }}>
+          <span style={{ fontSize:"12px", color:C.muted }}>
+            {activeSource!=="전체"?activeSource:"전체"}{activeTag?` · #${activeTag}`:""} · <strong style={{color:C.text}}>{filtered.length}개</strong>
+          </span>
+          {(search||activeTag||activeSource!=="전체"||dateFrom||dateTo) && (
+            <button onClick={()=>{setSearch("");setActiveTag("");setActiveSource("전체");setDateFrom("");setDateTo("");setPage(1);}}
+              style={{ fontSize:"11px", color:C.muted, background:"none", border:"none", cursor:"pointer" }}>전체 초기화</button>
+          )}
+        </div>
 
         {filtered.length===0
           ? <div style={{ padding:"60px 0", textAlign:"center", color:C.muted, fontSize:"14px" }}>저장된 문구가 없어요</div>
-          : filtered.map(q=>(
+          : paginated.map(q=>(
             <QuoteRow key={q.id} quote={q}
               onDelete={id=>saveQuotes(quotes.filter(q=>q.id!==id))}
               onEdit={q=>setEditTarget(q)} />
           ))
         }
-      </main>
 
-      {/* 모바일 하단 고정 버튼 */}
-      {isMobile && (
-        <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.cream, borderTop:`1px solid ${C.border}`, padding:"10px 16px", display:"flex", gap:8, zIndex:100 }}>
-          <button onClick={()=>setShowModal(true)} style={{ flex:2, padding:"11px", background:C.terracotta, border:"none", borderRadius:"10px", color:"#fff", fontSize:"13px", fontWeight:"600", cursor:"pointer" }}>+ 문구 추가</button>
+        <Pagination total={filtered.length} page={page} setPage={setPage} />
+
+        {/* 문구 추가 버튼 — 최하단 */}
+        <div style={{ display:"flex", justifyContent:"center", marginTop:16, paddingBottom:8 }}>
+          <button onClick={()=>setShowModal(true)}
+            style={{ width:"50%", padding:"12px", background:C.terracotta, border:"none", borderRadius:"10px", color:"#fff", fontSize:"14px", fontWeight:"600", cursor:"pointer", boxShadow:"0 2px 8px rgba(196,82,42,0.3)" }}
+            onMouseEnter={e=>(e.currentTarget.style.background=C.terracottaHover)}
+            onMouseLeave={e=>(e.currentTarget.style.background=C.terracotta)}>
+            + 문구 추가
+          </button>
         </div>
-      )}
+
+      </main>
 
       {showModal && <AddModal onClose={()=>setShowModal(false)} onAdd={q=>saveQuotes([...q,...quotes])} onEdit={()=>{}} existingQuotes={quotes} />}
       {editTarget && <AddModal onClose={()=>setEditTarget(null)} onAdd={()=>{}} onEdit={u=>{saveQuotes(quotes.map(q=>q.id===u.id?u:q));setEditTarget(null);}} existingQuotes={quotes} initialData={editTarget} />}
-    </div>
-  );
-}
