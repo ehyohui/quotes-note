@@ -207,50 +207,7 @@ function QuoteRow({ quote, onDelete, onEdit }) {
   );
 }
 
-// ── 내보내기/가져오기 모달 ────────────────────────────────────────────────────
-function ExportModal({ quotes, onClose }) {
-  const json = JSON.stringify(quotes, null, 2);
-  return (
-    <div onClick={e=>e.target===e.currentTarget&&onClose()}
-      style={{ position:"fixed", inset:0, background:"rgba(44,26,14,0.5)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:1000 }}>
-      <div style={{ background:C.cream, borderRadius:"20px 20px 0 0", padding:"24px 20px", width:"100%", maxWidth:"560px", boxShadow:"0 -8px 40px rgba(44,26,14,0.2)" }}>
-        <div style={{ width:40, height:4, background:C.border, borderRadius:2, margin:"0 auto 20px" }} />
-        <h2 style={{ fontSize:"17px", fontWeight:"700", color:C.terracotta, marginBottom:"6px", fontFamily:"'Nanum Myeongjo',serif" }}>내보내기</h2>
-        <p style={{ fontSize:"12px", color:C.muted, marginBottom:"12px" }}>아래 텍스트를 클릭하면 전체 선택돼요. Ctrl+C(Mac: Cmd+C)로 복사 후 메모장에 저장하세요.</p>
-        <textarea readOnly value={json} onClick={e=>e.target.select()}
-          style={{ width:"100%", height:"200px", background:C.white, border:`1px solid ${C.border}`, borderRadius:"8px", padding:"12px", fontSize:"11px", fontFamily:"monospace", color:C.text, outline:"none", resize:"none", boxSizing:"border-box" }} />
-        <button onClick={onClose} style={{ width:"100%", padding:"13px", background:C.pill, border:"none", borderRadius:"10px", color:C.pillText, cursor:"pointer", fontSize:"15px", marginTop:"12px" }}>닫기</button>
-      </div>
-    </div>
-  );
-}
 
-function ImportModal({ onImport, onClose }) {
-  const [text, setText] = useState("");
-  const confirm = () => {
-    try {
-      const data = JSON.parse(text);
-      if (Array.isArray(data) && data.length>0) { onImport(data); onClose(); }
-      else alert("올바른 형식이 아니에요");
-    } catch { alert("JSON 형식이 맞지 않아요"); }
-  };
-  return (
-    <div onClick={e=>e.target===e.currentTarget&&onClose()}
-      style={{ position:"fixed", inset:0, background:"rgba(44,26,14,0.5)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:1000 }}>
-      <div style={{ background:C.cream, borderRadius:"20px 20px 0 0", padding:"24px 20px", width:"100%", maxWidth:"560px", boxShadow:"0 -8px 40px rgba(44,26,14,0.2)" }}>
-        <div style={{ width:40, height:4, background:C.border, borderRadius:2, margin:"0 auto 20px" }} />
-        <h2 style={{ fontSize:"17px", fontWeight:"700", color:C.terracotta, marginBottom:"6px", fontFamily:"'Nanum Myeongjo',serif" }}>가져오기</h2>
-        <p style={{ fontSize:"12px", color:C.muted, marginBottom:"12px" }}>내보내기로 복사해둔 텍스트를 붙여넣으세요.</p>
-        <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="여기에 붙여넣기..."
-          style={{ width:"100%", height:"200px", background:C.white, border:`1px solid ${C.border}`, borderRadius:"8px", padding:"12px", fontSize:"11px", fontFamily:"monospace", color:C.text, outline:"none", resize:"none", boxSizing:"border-box" }} />
-        <div style={{ display:"flex", gap:"10px", marginTop:"12px" }}>
-          <button onClick={confirm} style={{ flex:2, padding:"13px", background:text.trim()?C.terracotta:C.border, border:"none", borderRadius:"10px", color:"#fff", cursor:text.trim()?"pointer":"default", fontSize:"15px", fontWeight:"600" }}>가져오기</button>
-          <button onClick={onClose} style={{ flex:1, padding:"13px", background:C.pill, border:"none", borderRadius:"10px", color:C.pillText, cursor:"pointer", fontSize:"15px" }}>취소</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── 사이드바 드로어 (모바일) ──────────────────────────────────────────────────
 function Drawer({ open, onClose, activeSource, setActiveSource, counts }) {
@@ -282,8 +239,6 @@ export default function App() {
   const [activeTag, setActiveTag]       = useState("");
   const [showModal, setShowModal]       = useState(false);
   const [editTarget, setEditTarget]     = useState(null);
-  const [showExport, setShowExport]     = useState(false);
-  const [showImport, setShowImport]     = useState(false);
   const [showDrawer, setShowDrawer]     = useState(false);
   const [loaded, setLoaded]             = useState(false);
   const [isMobile, setIsMobile]         = useState(window.innerWidth < 640);
@@ -295,22 +250,22 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const result = await window.storage.get("quotes-data");
-        if (result?.value) {
-          const saved = JSON.parse(result.value);
-          if (Array.isArray(saved) && saved.length > 0) { setQuotes(saved); setLoaded(true); return; }
+    try {
+      const saved = localStorage.getItem("quotes-data");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setQuotes(parsed); setLoaded(true); return;
         }
-      } catch {}
-      setQuotes(INITIAL_QUOTES);
-      setLoaded(true);
-    })();
+      }
+    } catch {}
+    setQuotes(INITIAL_QUOTES);
+    setLoaded(true);
   }, []);
 
-  const saveQuotes = async (q) => {
+  const saveQuotes = (q) => {
     setQuotes(q);
-    try { await window.storage.set("quotes-data", JSON.stringify(q)); } catch {}
+    try { localStorage.setItem("quotes-data", JSON.stringify(q)); } catch {}
   };
 
   const filtered = useMemo(() => quotes.filter(q => {
@@ -387,12 +342,6 @@ export default function App() {
           </div>
           {!isMobile && (
             <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-              <button onClick={()=>setShowImport(true)} style={{ padding:"8px 13px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"8px", color:C.muted, fontSize:"13px", cursor:"pointer" }}
-                onMouseEnter={e=>{e.currentTarget.style.background=C.hover;e.currentTarget.style.color=C.text;}}
-                onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=C.muted;}}>↑ 가져오기</button>
-              <button onClick={()=>setShowExport(true)} style={{ padding:"8px 13px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"8px", color:C.muted, fontSize:"13px", cursor:"pointer" }}
-                onMouseEnter={e=>{e.currentTarget.style.background=C.hover;e.currentTarget.style.color=C.text;}}
-                onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=C.muted;}}>↓ 내보내기</button>
               <button onClick={()=>setShowModal(true)} style={{ padding:"10px 18px", background:C.terracotta, border:"none", borderRadius:"8px", color:"#fff", fontSize:"13px", fontWeight:"600", cursor:"pointer", boxShadow:"0 2px 8px rgba(196,82,42,0.25)" }}
                 onMouseEnter={e=>(e.currentTarget.style.background=C.terracottaHover)}
                 onMouseLeave={e=>(e.currentTarget.style.background=C.terracotta)}>+ 문구 추가</button>
@@ -441,14 +390,10 @@ export default function App() {
       {/* 모바일 하단 고정 버튼 */}
       {isMobile && (
         <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.cream, borderTop:`1px solid ${C.border}`, padding:"10px 16px", display:"flex", gap:8, zIndex:100 }}>
-          <button onClick={()=>setShowImport(true)} style={{ flex:1, padding:"11px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"10px", color:C.muted, fontSize:"13px", cursor:"pointer" }}>↑ 가져오기</button>
-          <button onClick={()=>setShowExport(true)} style={{ flex:1, padding:"11px", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"10px", color:C.muted, fontSize:"13px", cursor:"pointer" }}>↓ 내보내기</button>
           <button onClick={()=>setShowModal(true)} style={{ flex:2, padding:"11px", background:C.terracotta, border:"none", borderRadius:"10px", color:"#fff", fontSize:"13px", fontWeight:"600", cursor:"pointer" }}>+ 문구 추가</button>
         </div>
       )}
 
-      {showExport && <ExportModal quotes={quotes} onClose={()=>setShowExport(false)} />}
-      {showImport && <ImportModal onImport={q=>saveQuotes(q)} onClose={()=>setShowImport(false)} />}
       {showModal && <AddModal onClose={()=>setShowModal(false)} onAdd={q=>saveQuotes([...q,...quotes])} onEdit={()=>{}} existingQuotes={quotes} />}
       {editTarget && <AddModal onClose={()=>setEditTarget(null)} onAdd={()=>{}} onEdit={u=>{saveQuotes(quotes.map(q=>q.id===u.id?u:q));setEditTarget(null);}} existingQuotes={quotes} initialData={editTarget} />}
     </div>
